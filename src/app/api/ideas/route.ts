@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
+import { eq } from "drizzle-orm";
 import { db } from "@/db/index";
 import { startupIdeas } from "@/db/schema";
 import { verifyToken } from "@/lib/auth";
@@ -84,9 +85,10 @@ export async function GET() {
 
     const ideas = await db
       .select()
-      .from(startupIdeas);
+      .from(startupIdeas)
+      .where(eq(startupIdeas.ownerId, payload.userId));
 
-    return NextResponse.json({ ideas });
+    return NextResponse.json({ ideas }, { status: 200 });
   } catch (error) {
     console.error("IDEAS FETCH ERROR:", error);
 

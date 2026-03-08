@@ -15,6 +15,8 @@ type Idea = {
 type UserType = {
   userId: string;
   email: string;
+  name?: string;
+  role?: string;
 };
 
 export default function DashboardPage() {
@@ -93,8 +95,13 @@ export default function DashboardPage() {
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
+
           <p className="mt-2 text-gray-600">
-            Dobrodošli, {user?.email}
+            Dobrodošli, {user?.name || user?.email}
+          </p>
+
+          <p className="text-sm text-gray-500">
+            Uloga: {user?.role}
           </p>
         </div>
 
@@ -145,11 +152,18 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex gap-2">
-                   <Link href={`/ideas/${idea.id}/edit`}>
+                  <Link href={`/ideas/${idea.id}`}>
+                    <button className="rounded-lg bg-blue-500 px-3 py-2 text-white transition hover:bg-blue-600">
+                      Detalji
+                    </button>
+                  </Link>
+
+                  <Link href={`/ideas/${idea.id}/edit`}>
                     <button className="rounded-lg bg-yellow-500 px-3 py-2 text-white transition hover:bg-yellow-600">
-                       Izmeni
-                        </button>
-               </Link>
+                      Izmeni
+                    </button>
+                  </Link>
+
                   <button
                     onClick={() => handleDeleteIdea(idea.id)}
                     className="rounded-lg bg-red-500 px-3 py-2 text-white transition hover:bg-red-600"
