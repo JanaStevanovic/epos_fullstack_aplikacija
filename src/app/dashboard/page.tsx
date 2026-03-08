@@ -145,6 +145,11 @@ export default function DashboardPage() {
                 </div>
 
                 <div className="flex gap-2">
+                   <Link href={`/ideas/${idea.id}/edit`}>
+                    <button className="rounded-lg bg-yellow-500 px-3 py-2 text-white transition hover:bg-yellow-600">
+                       Izmeni
+                        </button>
+               </Link>
                   <button
                     onClick={() => handleDeleteIdea(idea.id)}
                     className="rounded-lg bg-red-500 px-3 py-2 text-white transition hover:bg-red-600"
