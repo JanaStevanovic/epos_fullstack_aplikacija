@@ -66,3 +66,33 @@ export async function POST(req: Request) {
     );
   }
 }
+
+export async function GET() {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return NextResponse.json({ error: "Niste prijavljeni." }, { status: 401 });
+    }
+
+    const payload = verifyToken(token) as { userId: string; email: string } | null;
+
+    if (!payload) {
+      return NextResponse.json({ error: "Nevažeći token." }, { status: 401 });
+    }
+
+    const ideas = await db
+      .select()
+      .from(startupIdeas);
+
+    return NextResponse.json({ ideas });
+  } catch (error) {
+    console.error("IDEAS FETCH ERROR:", error);
+
+    return NextResponse.json(
+      { error: "Neuspešno učitavanje ideja." },
+      { status: 500 }
+    );
+  }
+}

@@ -6,30 +6,43 @@ import Card from "@/components/Card";
 import Button from "@/components/Button";
 import Link from "next/link";
 
+type Idea = {
+  id: string;
+  title: string;
+  startupStage: string;
+};
+
 type UserType = {
   userId: string;
   email: string;
-  iat: number;
-  exp: number;
 };
 
 export default function DashboardPage() {
   const router = useRouter();
+
   const [user, setUser] = useState<UserType | null>(null);
+  const [ideas, setIdeas] = useState<Idea[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    async function fetchUser() {
+    async function fetchData() {
       try {
-        const res = await fetch("/api/auth/me");
-        const data = await res.json();
+        const userRes = await fetch("/api/auth/me");
+        const userData = await userRes.json();
 
-        if (!res.ok || !data.user) {
+        if (!userRes.ok || !userData.user) {
           router.push("/login");
           return;
         }
 
-        setUser(data.user);
+        setUser(userData.user);
+
+        const ideasRes = await fetch("/api/ideas");
+        const ideasData = await ideasRes.json();
+
+        if (ideasRes.ok) {
+          setIdeas(ideasData.ideas);
+        }
       } catch {
         router.push("/login");
       } finally {
@@ -37,7 +50,7 @@ export default function DashboardPage() {
       }
     }
 
-    fetchUser();
+    fetchData();
   }, [router]);
 
   if (loading) {
@@ -46,6 +59,7 @@ export default function DashboardPage() {
 
   return (
     <div className="mx-auto max-w-6xl">
+
       <div className="mb-8 flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
@@ -59,27 +73,52 @@ export default function DashboardPage() {
         </Link>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-3 mb-8">
         <Card title="Ukupno validacija">
-          <p className="text-3xl font-bold text-blue-600">0</p>
-        </Card>
-
-        <Card title="Poslednja aktivnost">
-          <p className="text-gray-600">Još uvek nema kreiranih validacija.</p>
+          <p className="text-3xl font-bold text-blue-600">
+            {ideas.length}
+          </p>
         </Card>
 
         <Card title="Status sistema">
-          <p className="font-medium text-green-600">Sistem je aktivan</p>
+          <p className="font-medium text-green-600">
+            Sistem je aktivan
+          </p>
         </Card>
-      </div>
 
-      <div className="mt-8">
-        <Card title="Moje validacije">
+        <Card title="Platforma">
           <p className="text-gray-600">
-            Trenutno nema sačuvanih validacija startap ideja.
+            MVP za validaciju startap ideja
           </p>
         </Card>
       </div>
+
+      <Card title="Moje startap ideje">
+        {ideas.length === 0 ? (
+          <p className="text-gray-600">
+            Još uvek nema kreiranih ideja.
+          </p>
+        ) : (
+          <div className="space-y-4">
+            {ideas.map((idea) => (
+              <div
+                key={idea.id}
+                className="flex items-center justify-between border rounded-lg p-4"
+              >
+                <div>
+                  <h3 className="font-semibold text-lg">
+                    {idea.title}
+                  </h3>
+                  <p className="text-sm text-gray-500">
+                    Faza: {idea.startupStage}
+                  </p>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </Card>
+
     </div>
   );
 }
