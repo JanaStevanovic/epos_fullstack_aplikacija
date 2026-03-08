@@ -8,6 +8,13 @@
       "when": 1772976705732,
       "tag": "0000_cold_mister_fear",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1772984994312,
+      "tag": "0001_windy_triton",
+      "breakpoints": true
     }
   ]
 }
