@@ -1,6 +1,6 @@
 # Startup Idea Validation Platform (MVP)
 
-Fullstack web aplikacija razvijena korišćenjem **Next.js** frameworka za potrebe domaćeg zadatka iz predmeta **Razvoj naprednih aplikacija** na Fakultetu organizacionih nauka.
+Fullstack web aplikacija razvijena korišćenjem **Next.js** frameworka za potrebe domaćeg zadatka iz predmeta **Razvoj naprednih aplikacija elektronskog poslovanja** na Fakultetu organizacionih nauka.
 
 Aplikacija predstavlja **MVP verziju platforme za validaciju startap ideja**. Korisnici mogu da registruju nalog, prijave se u sistem i upravljaju svojim startap idejama kroz jednostavan dashboard interfejs.
 
