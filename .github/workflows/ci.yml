@@ -1,0 +1,98 @@
+name: CI Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed
+
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: windows-latest
+
+    env:
+      DATABASE_URL: postgresql://ci_user:ci_password@127.0.0.1:5432/ci_db
+      JWT_SECRET: ci-only-dummy-secret
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build application
+        run: npm run build
+
+      - name: Verify build
+        shell: pwsh
+        run: |
+          if (!(Test-Path ".next")) {
+            Write-Error "Build failed: .next directory does not exist."
+            exit 1
+          }
+
+          Write-Host "Next.js build completed successfully."
+          "Build successful" | Out-File build-success.txt
+
+      - name: Upload build verification artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-verification
+          path: build-success.txt
+
+
+  lint:
+    if: github.event_name == 'workflow_dispatch' || github.event.pull_request.merged == true
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run ESLint
+        run: npm run lint
+
+
+  verify-build:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+      - name: Download build verification artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-verification
+
+      - name: Verify build artifact
+        shell: pwsh
+        run: |
+          if (!(Test-Path "build-success.txt")) {
+            Write-Error "Build verification artifact is missing."
+            exit 1
+          }
+
+          Write-Host "Build artifact successfully verified."
+          Get-Content build-success.txt
