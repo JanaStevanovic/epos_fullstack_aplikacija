@@ -1,0 +1,83 @@
+name: startup-validation
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: startup_validation_db
+
+    env_file:
+      - .env.db
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    networks:
+      - app_network
+
+    restart: unless-stopped
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    container_name: startup_validation_app
+
+    env_file:
+      - .env.app
+
+    ports:
+      - "3000:3000"
+
+    volumes:
+      - type: bind
+        source: .
+        target: /app
+      - node_modules:/app/node_modules
+      - next_cache:/app/.next
+
+    networks:
+      - app_network
+
+    restart: unless-stopped
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    init: true
+
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+
+networks:
+  app_network:
+    driver: bridge
+
+
+volumes:
+  postgres_data:
+  node_modules:
+  next_cache:
